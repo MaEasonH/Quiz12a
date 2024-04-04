@@ -1,0 +1,69 @@
+---
+title: "Quiz12a-4"
+format: pdf
+author: Heng ma
+editor: visual
+---
+```{r}
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("rstanarm")
+library(dplyr)
+library(ggplot2)
+library(rstanarm)
+```
+
+# sitmulate
+```{r}
+
+set.seed(1)
+years <- 2004:2023
+hospital_names <- c('Hospital A', 'Hospital B', 'Hospital C', 'Hospital D', 'Hospital E')
+n <- length(years) * length(hospital_names)
+
+# Generate simulated data
+data <- expand.grid(Year = years, HospitalName = hospital_names)
+data$TotalDeaths <- sample(100:500, n, replace = TRUE)
+
+# View the first few rows of the data
+head(data)
+
+# calculating the total number of cancer deaths per year
+yearly_death_sum <- data %>%
+  group_by(Year) %>%
+  summarise(TotalDeaths = sum(TotalDeaths))
+```
+# plot
+```{r}
+data <- data.frame(
+  Year = 2004:2023,
+  TotalDeaths = c(1500, 1600, 1450, 1550, 1650, 1700, 1500, 1800, 1750, 1850, 
+                  1650, 1550, 1600, 1700, 1750, 1500, 1900, 1800, 1650, 1750)
+)
+
+# Plot using ggplot2
+ggplot(data, aes(x = Year, y = TotalDeaths)) +
+  geom_line(color = "blue", size = 1) +  # Line color and size
+  geom_point(color = "blue", size = 3) + # Point color and size
+  theme_minimal() + # Minimal theme
+  labs(title = "Yearly Total Cancer Deaths from 2004 to 2023",
+       x = "Year",
+       y = "Total Deaths") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+# rstanarm
+```{r}
+
+
+# Fit a Bayesian linear regression model with rstanarm
+# Assuming the data frame is named 'data' and has columns 'Year' and 'TotalDeaths'
+
+# Standardize the year for better estimation
+data$Year_scaled <- scale(data$Year)
+
+# Fit the model
+bayes_model <- stan_glm(TotalDeaths ~ Year_scaled, data = data, family = gaussian())
+
+# Print the summary of the model
+print(summary(bayes_model))
+```

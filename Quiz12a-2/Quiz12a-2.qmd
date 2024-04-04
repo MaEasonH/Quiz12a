@@ -1,0 +1,90 @@
+---
+title: "Quiz12a-2"
+format: pdf
+author: Heng Ma
+editor: visual
+---
+
+# Sitmulated
+
+```{r}
+library(dplyr)
+set.seed(1)
+years <- 2004:2023
+hospital_names <- c('Hospital A', 'Hospital B', 'Hospital C', 'Hospital D', 'Hospital E')
+n <- length(years) * length(hospital_names)
+
+# Generate simulated data
+data <- expand.grid(Year = years, HospitalName = hospital_names)
+data$TotalDeaths <- sample(100:500, n, replace = TRUE)
+
+# View the first few rows of the data
+head(data)
+
+# calculating the total number of cancer deaths per year
+yearly_death_sum <- data %>%
+  group_by(Year) %>%
+  summarise(TotalDeaths = sum(TotalDeaths))
+
+# Print the results
+print(yearly_death_sum)
+
+
+```
+
+# Ten tests
+
+```{r}
+library(testthat)
+# Test 1: Data has the correct columns
+test_that("Data has the correct columns", {
+  expect_true(all(c("Year", "HospitalName", "TotalDeaths") %in% colnames(data)))
+})
+
+# Test 2: There are no missing values
+test_that("There are no missing values", {
+  expect_true(!any(is.na(data)))
+})
+
+# Test 3: Year range is as expected
+test_that("Year range is correct", {
+  expect_equal(range(data$Year), c(2004, 2023))
+})
+
+# Test 4: Data includes all expected hospitals
+test_that("All hospitals are included", {
+  expected_hospitals <- c('Hospital A', 'Hospital B', 'Hospital C', 'Hospital D', 'Hospital E')
+  expect_equal(sort(unique(data$HospitalName)), sort(expected_hospitals))
+})
+
+# Test 5: TotalDeaths is within expected range
+test_that("TotalDeaths is within expected range", {
+  expect_true(all(data$TotalDeaths >= 100 & data$TotalDeaths <= 500))
+})
+
+# Test 6: Data has the expected number of rows
+test_that("Data has the expected number of rows", {
+  expect_equal(nrow(data), length(2004:2023) * 5)
+})
+
+# Test 7: Yearly death sum calculation is correct
+test_that("Yearly death sum calculation is correct", {
+  yearly_deaths <- data %>% group_by(Year) %>% summarise(SumDeaths = sum(TotalDeaths))
+  expect_true(all(yearly_deaths$SumDeaths > 0))
+})
+
+# Test 8: No duplicate entries for a year-hospital combination
+test_that("No duplicate year-hospital combinations", {
+  expect_equal(nrow(data), nrow(unique(data[, c("Year", "HospitalName")])))
+})
+
+# Test 9: TotalDeaths are integers
+test_that("TotalDeaths are integers", {
+  expect_true(all(floor(data$TotalDeaths) == data$TotalDeaths))
+})
+
+# Test 10: Data frame is sorted by year
+test_that("Data is sorted by year", {
+  expect_true(identical(data$Year, sort(data$Year)))
+})
+```
